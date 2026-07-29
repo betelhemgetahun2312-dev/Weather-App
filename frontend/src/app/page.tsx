@@ -9,6 +9,7 @@ import SearchBar from '@/components/weather/SearchBar';
 import WeatherResult from '@/components/weather/WeatherResult';
 import LocationButton from '@/components/weather/LocationButton';
 import RecentSearches from '@/components/weather/RecentSearches';
+import EmptyState from '@/components/ui/EmptyState';
 import { useRecentSearches } from '@/hooks/useRecentSearches';
 import { getWeatherTheme, getBackgroundConfig, isNightTime } from '@/utils/weatherBackground';
 
@@ -141,15 +142,11 @@ export default function HomePage() {
               onRetry={handleRetry}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <span className="mb-5 text-7xl" aria-hidden="true">🌍</span>
-              <p className="text-xl font-semibold text-white/80">
-                Search for a city or use your location
-              </p>
-              <p className="mt-2 text-sm text-white/40">
-                Try London, Tokyo, New York, or click &quot;Use My Location&quot;.
-              </p>
-            </div>
+            <EmptyState
+              icon="🌍"
+              title="Search for a city or use your location"
+              description='Try London, Tokyo, New York, or click "Use My Location".'
+            />
           )}
         </section>
 

@@ -19,6 +19,17 @@ apiClient.interceptors.response.use(
       );
     }
 
+    const status: number = error.response.status;
+
+    if (status === 404) {
+      return Promise.reject(
+        new Error(
+          error.response.data?.error?.message ||
+          'City not found. Please check the name and try again.'
+        )
+      );
+    }
+
     const message =
       error.response.data?.error?.message ||
       error.response.data?.message ||

@@ -2,6 +2,8 @@ import { CurrentWeather, ForecastData } from '@/types/weather';
 import WeatherCard from '@/components/weather/WeatherCard';
 import ForecastStrip from '@/components/weather/ForecastStrip';
 import ErrorMessage from '@/components/weather/ErrorMessage';
+import Skeleton from '@/components/ui/Skeleton';
+import Spinner from '@/components/ui/Spinner';
 
 interface WeatherResultProps {
   weather: CurrentWeather | null;
@@ -13,35 +15,34 @@ interface WeatherResultProps {
   onRetry: () => void;
 }
 
-function SkeletonPulse({ className }: { className: string }) {
-  return <div className={`animate-pulse rounded-2xl bg-white/10 ${className}`} />;
-}
-
 function WeatherSkeleton() {
   return (
-    <div className="w-full overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 p-6 shadow-2xl">
+    <div
+      aria-label="Loading weather data"
+      className="w-full overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 p-6 shadow-2xl"
+    >
       <div className="flex justify-between">
         <div className="flex flex-col gap-2">
-          <SkeletonPulse className="h-8 w-40" />
-          <SkeletonPulse className="h-4 w-20" />
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-4 w-20" />
         </div>
         <div className="flex flex-col items-end gap-2">
-          <SkeletonPulse className="h-4 w-36" />
-          <SkeletonPulse className="h-7 w-28" />
+          <Skeleton className="h-4 w-36" />
+          <Skeleton className="h-7 w-28" />
         </div>
       </div>
       <div className="my-4 h-px bg-white/10" />
       <div className="flex items-center justify-between py-6">
         <div className="flex flex-col gap-3">
-          <SkeletonPulse className="h-20 w-48" />
-          <SkeletonPulse className="h-5 w-32" />
-          <SkeletonPulse className="h-4 w-56" />
+          <Skeleton className="h-20 w-48" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-4 w-56" />
         </div>
-        <SkeletonPulse className="h-28 w-28 rounded-full" />
+        <Skeleton className="h-28 w-28 rounded-full" />
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <SkeletonPulse key={i} className="h-20" />
+          <Skeleton key={i} className="h-20" />
         ))}
       </div>
     </div>
@@ -50,17 +51,20 @@ function WeatherSkeleton() {
 
 function ForecastSkeleton() {
   return (
-    <div className="w-full overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6">
+    <div
+      aria-label="Loading forecast data"
+      className="w-full overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6"
+    >
       <div className="mb-5 flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <SkeletonPulse className="h-5 w-32" />
-          <SkeletonPulse className="h-3 w-24" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-3 w-24" />
         </div>
-        <SkeletonPulse className="h-6 w-16 rounded-full" />
+        <Skeleton className="h-6 w-16 rounded-full" />
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <SkeletonPulse key={i} className="h-44 rounded-2xl" />
+          <Skeleton key={i} className="h-44 rounded-2xl" />
         ))}
       </div>
     </div>
@@ -76,9 +80,10 @@ export default function WeatherResult({
   forecastError,
   onRetry,
 }: WeatherResultProps) {
+  const isLoading = weatherLoading || forecastLoading;
   const hasError = weatherError || forecastError;
 
-  if (hasError && !weatherLoading && !forecastLoading) {
+  if (hasError && !isLoading) {
     return (
       <ErrorMessage
         message={weatherError || forecastError || 'An unexpected error occurred.'}
@@ -88,11 +93,31 @@ export default function WeatherResult({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {weatherLoading ? <WeatherSkeleton /> : weather && <WeatherCard data={weather} />}
-      {forecastLoading ? <ForecastSkeleton /> : forecast && forecast.daily.length > 0 && (
-        <ForecastStrip data={forecast} />
+    <div
+      aria-busy={isLoading}
+      aria-live="polite"
+      className="flex flex-col gap-6"
+    >
+      {/* Screen-reader-only loading announcement */}
+      {isLoading && (
+        <p className="sr-only" role="status">
+          Loading weather information, please wait.
+        </p>
       )}
+
+      {/* Inline loading indicator shown above results while refreshing */}
+      {isLoading && (weather || forecast) && (
+        <div className="flex items-center justify-center gap-2 text-sm text-white/50">
+          <Spinner size="sm" />
+          <span>Updating…</span>
+        </div>
+      )}
+
+      {weatherLoading ? <WeatherSkeleton /> : weather && <WeatherCard data={weather} />}
+
+      {forecastLoading
+        ? <ForecastSkeleton />
+        : forecast && forecast.daily.length > 0 && <ForecastStrip data={forecast} />}
     </div>
   );
 }
