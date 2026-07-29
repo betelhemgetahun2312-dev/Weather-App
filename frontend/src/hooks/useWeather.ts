@@ -1,14 +1,33 @@
 'use client';
 
-import { useState } from 'react';
-import { WeatherData } from '@/types/weather';
+import { useState, useCallback } from 'react';
+import { CurrentWeather, Units } from '@/types/weather';
+import { fetchCurrentWeather } from '@/services/weather.service';
+
+interface UseWeatherState {
+  data: CurrentWeather | null;
+  loading: boolean;
+  error: string | null;
+}
 
 export function useWeather() {
-  const [data, setData] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<UseWeatherState>({
+    data: null,
+    loading: false,
+    error: null,
+  });
 
-  // TODO: implement fetch logic using apiClient
+  const getWeather = useCallback(async (city: string, units: Units = 'metric') => {
+    setState({ data: null, loading: true, error: null });
+    try {
+      const data = await fetchCurrentWeather(city, units);
+      setState({ data, loading: false, error: null });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to fetch weather';
+      setState({ data: null, loading: false, error: message });
+    }
+  }, []);
 
-  return { data, loading, error };
+  return { ...state, getWeather };
 }
