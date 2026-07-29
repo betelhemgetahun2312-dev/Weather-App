@@ -17,12 +17,34 @@ export const fetchCurrentWeather = async (
   return data.data;
 };
 
+export const fetchWeatherByCoords = async (
+  lat: number,
+  lon: number,
+  units: Units = 'metric'
+): Promise<CurrentWeather> => {
+  const { data } = await apiClient.get<ApiResponse<CurrentWeather>>('/weather', {
+    params: { lat, lon, units },
+  });
+  return data.data;
+};
+
 export const fetchForecast = async (
   city: string,
   units: Units = 'metric'
 ): Promise<ForecastData> => {
   const { data } = await apiClient.get<ApiResponse<ForecastData>>('/forecast', {
     params: { city, units },
+  });
+  return data.data;
+};
+
+export const fetchForecastByCoords = async (
+  lat: number,
+  lon: number,
+  units: Units = 'metric'
+): Promise<ForecastData> => {
+  const { data } = await apiClient.get<ApiResponse<ForecastData>>('/forecast', {
+    params: { lat, lon, units },
   });
   return data.data;
 };

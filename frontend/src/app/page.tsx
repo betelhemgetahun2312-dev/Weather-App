@@ -4,65 +4,84 @@ import { useState, useCallback } from 'react';
 import { Units } from '@/types/weather';
 import { useWeather } from '@/hooks/useWeather';
 import { useForecast } from '@/hooks/useForecast';
+import { useGeolocation } from '@/hooks/useGeolocation';
 import SearchBar from '@/components/weather/SearchBar';
 import WeatherResult from '@/components/weather/WeatherResult';
-import {
-  getWeatherTheme,
-  getBackgroundConfig,
-  isNightTime,
-} from '@/utils/weatherBackground';
+import LocationButton from '@/components/weather/LocationButton';
+import { getWeatherTheme, getBackgroundConfig, isNightTime } from '@/utils/weatherBackground';
+
+const THEME_ICONS: Record<string, string> = {
+  sunny: '☀️',
+  cloudy: '☁️',
+  rain: '🌧️',
+  snow: '❄️',
+  night: '🌙',
+  default: '🌤️',
+};
 
 export default function HomePage() {
   const [lastCity, setLastCity] = useState('');
+  const [lastCoords, setLastCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [units] = useState<Units>('metric');
 
-  const { data: weather, loading: weatherLoading, error: weatherError, getWeather } = useWeather();
-  const { data: forecast, loading: forecastLoading, error: forecastError, getForecast } = useForecast();
+  const { data: weather, loading: weatherLoading, error: weatherError, getWeather, getWeatherByCoords } = useWeather();
+  const { data: forecast, loading: forecastLoading, error: forecastError, getForecast, getForecastByCoords } = useForecast();
+  const { status: geoStatus, error: geoError, requestLocation, reset: resetGeo } = useGeolocation();
 
+  // Search by city name
   const handleSearch = useCallback(
     (city: string) => {
       setLastCity(city);
+      setLastCoords(null);
+      resetGeo();
       getWeather(city, units);
       getForecast(city, units);
     },
-    [getWeather, getForecast, units]
+    [getWeather, getForecast, units, resetGeo]
   );
 
+  // Search by coordinates — reuses existing hooks, no duplication
+  const handleLocationSearch = useCallback(() => {
+    requestLocation((lat, lon) => {
+      setLastCoords({ lat, lon });
+      setLastCity('');
+      getWeatherByCoords(lat, lon, units);
+      getForecastByCoords(lat, lon, units);
+    });
+  }, [requestLocation, getWeatherByCoords, getForecastByCoords, units]);
+
+  // Retry last search (city or coords)
   const handleRetry = useCallback(() => {
-    if (lastCity) handleSearch(lastCity);
-  }, [lastCity, handleSearch]);
+    if (lastCoords) {
+      getWeatherByCoords(lastCoords.lat, lastCoords.lon, units);
+      getForecastByCoords(lastCoords.lat, lastCoords.lon, units);
+    } else if (lastCity) {
+      getWeather(lastCity, units);
+      getForecast(lastCity, units);
+    }
+  }, [lastCoords, lastCity, getWeather, getForecast, getWeatherByCoords, getForecastByCoords, units]);
 
   const isLoading = weatherLoading || forecastLoading;
   const hasResult = weather || forecast || weatherError || forecastError || isLoading;
 
-  // Derive dynamic background
+  // Dynamic background
   const night = weather ? isNightTime(weather.sunrise, weather.sunset, weather.timezone) : false;
-  const conditionId = weather ? weather.weather.conditionId : 0;
+  const conditionId = weather?.weather.conditionId ?? 0;
   const theme = weather ? getWeatherTheme(conditionId, night) : 'default';
   const bg = getBackgroundConfig(theme);
 
   return (
-    // Outer wrapper — full animated gradient background
     <div
-      className={`
-        min-h-screen bg-gradient-to-br transition-all duration-1000 ease-in-out
-        ${bg.gradient}
-      `}
+      className={`min-h-screen bg-gradient-to-br transition-all duration-1000 ease-in-out ${bg.gradient}`}
       aria-label={`Weather background: ${bg.label}`}
     >
-      {/* Subtle overlay for contrast */}
-      <div className={`min-h-screen ${bg.overlay} transition-all duration-1000`}>
+      <div className={`min-h-screen transition-all duration-1000 ${bg.overlay}`}>
 
-        {/* Hero search */}
+        {/* Hero */}
         <section className="px-4 pb-8 pt-14 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-3 text-5xl" aria-hidden="true">
-              {theme === 'sunny' && '☀️'}
-              {theme === 'cloudy' && '☁️'}
-              {theme === 'rain' && '🌧️'}
-              {theme === 'snow' && '❄️'}
-              {theme === 'night' && '🌙'}
-              {(theme === 'default') && '🌤️'}
+              {THEME_ICONS[theme] ?? '🌤️'}
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-white drop-shadow sm:text-4xl">
               Weather Dashboard
@@ -70,11 +89,22 @@ export default function HomePage() {
             <p className="mt-3 text-base text-white/60">
               Real-time weather for any city in the world.
             </p>
+
+            {/* Search bar */}
             <div className="mx-auto mt-8 max-w-xl">
               <SearchBar
                 onSearch={handleSearch}
                 loading={isLoading}
                 placeholder="Search city... e.g. London, Tokyo, New York"
+              />
+            </div>
+
+            {/* Location button — separated from search, no code duplication */}
+            <div className="mt-4 flex justify-center">
+              <LocationButton
+                status={geoStatus}
+                error={geoError}
+                onClick={handleLocationSearch}
               />
             </div>
           </div>
@@ -97,10 +127,10 @@ export default function HomePage() {
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <span className="mb-5 text-7xl" aria-hidden="true">🌍</span>
               <p className="text-xl font-semibold text-white/80">
-                Search for a city to get started
+                Search for a city or use your location
               </p>
               <p className="mt-2 text-sm text-white/40">
-                Try London, Tokyo, New York, Sydney, or any city worldwide.
+                Try London, Tokyo, New York, or click &quot;Use My Location&quot;.
               </p>
             </div>
           )}
