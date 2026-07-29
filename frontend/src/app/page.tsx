@@ -39,21 +39,21 @@ export default function HomePage() {
   }, [lastCity, handleSearch]);
 
   const isLoading = weatherLoading || forecastLoading;
-  const hasResult = weather || forecast || weatherError || forecastError;
+  const hasResult = weather || forecast || weatherError || forecastError || isLoading;
 
   return (
-    <div className="flex flex-col">
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 px-4 py-20 text-white sm:px-6">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+      {/* Hero search bar */}
+      <section className="px-4 pb-8 pt-14 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 text-6xl">🌤️</div>
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+          <div className="mb-3 text-5xl">🌤️</div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             Weather Dashboard
           </h1>
-          <p className="mt-4 text-lg text-white/70">
-            Real-time weather data for any city in the world.
+          <p className="mt-3 text-base text-slate-400">
+            Real-time weather for any city in the world.
           </p>
-          <div className="mx-auto mt-10 max-w-xl">
+          <div className="mx-auto mt-8 max-w-xl">
             <SearchBar
               onSearch={handleSearch}
               loading={isLoading}
@@ -63,8 +63,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Results */}
-      <section className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
+      {/* Dashboard results */}
+      <section className="mx-auto w-full max-w-4xl px-4 pb-16 sm:px-6">
         {hasResult ? (
           <WeatherResult
             weather={weather}
@@ -77,12 +77,13 @@ export default function HomePage() {
             onRetry={handleRetry}
           />
         ) : (
-          /* Empty state */
-          <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400">
-            <span className="mb-4 text-6xl">🌍</span>
-            <p className="text-lg font-medium">Search for a city to get started</p>
-            <p className="mt-2 text-sm">
-              Try searching for London, Tokyo, New York, or any city worldwide.
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <span className="mb-5 text-7xl">🌍</span>
+            <p className="text-xl font-semibold text-slate-300">
+              Search for a city to get started
+            </p>
+            <p className="mt-2 text-sm text-slate-500">
+              Try London, Tokyo, New York, Sydney, or any city worldwide.
             </p>
           </div>
         )}
