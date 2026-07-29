@@ -33,11 +33,6 @@ export const formatShortDate = (dateStr: string): string => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-export const formatShortDate = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-};
-
 export const formatDay = (dateStr: string): string => {
   const date = new Date(dateStr);
   const today = new Date();

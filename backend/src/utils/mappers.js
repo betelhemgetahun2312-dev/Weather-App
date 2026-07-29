@@ -15,6 +15,7 @@ const mapCurrentWeather = (data) => ({
     max: Math.round(data.main.temp_max),
   },
   weather: {
+    conditionId: data.weather[0].id,
     description: data.weather[0].description,
     main: data.weather[0].main,
     icon: data.weather[0].icon,

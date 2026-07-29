@@ -11,6 +11,7 @@ export interface Temperature {
 }
 
 export interface WeatherCondition {
+  conditionId: number;
   description: string;
   main: string;
   icon: string;
