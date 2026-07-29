@@ -11,7 +11,6 @@ export const formatWindSpeed = (speed: number, units: Units = 'metric'): string 
 };
 
 export const formatHumidity = (humidity: number): string => `${humidity}%`;
-
 export const formatPressure = (pressure: number): string => `${pressure} hPa`;
 
 export const formatVisibility = (visibility: number | null): string => {
@@ -29,12 +28,21 @@ export const formatDate = (dateStr: string): string => {
   return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
+export const formatShortDate = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+export const formatShortDate = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
 export const formatDay = (dateStr: string): string => {
   const date = new Date(dateStr);
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
-
   if (date.toDateString() === today.toDateString()) return 'Today';
   if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
   return date.toLocaleDateString('en-US', { weekday: 'long' });
