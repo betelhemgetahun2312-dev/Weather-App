@@ -91,4 +91,40 @@ const getLocation = async (city, limit = 5) => {
   }
 };
 
-module.exports = { getCurrentWeather, getForecast, getLocation };
+/**
+ * Fetches current weather by coordinates.
+ * @param {number} lat
+ * @param {number} lon
+ * @param {string} units
+ */
+const getCurrentWeatherByCoords = async (lat, lon, units = 'metric') => {
+  logger.info(`Fetching current weather for coords [${lat}, ${lon}] [units: ${units}]`);
+  try {
+    const { data } = await weatherClient.get('/weather', {
+      params: { lat, lon, units },
+    });
+    return mapCurrentWeather(data);
+  } catch (err) {
+    handleApiError(err, `getCurrentWeatherByCoords(${lat}, ${lon})`);
+  }
+};
+
+/**
+ * Fetches 5-day forecast by coordinates.
+ * @param {number} lat
+ * @param {number} lon
+ * @param {string} units
+ */
+const getForecastByCoords = async (lat, lon, units = 'metric') => {
+  logger.info(`Fetching forecast for coords [${lat}, ${lon}] [units: ${units}]`);
+  try {
+    const { data } = await weatherClient.get('/forecast', {
+      params: { lat, lon, units },
+    });
+    return mapForecast(data);
+  } catch (err) {
+    handleApiError(err, `getForecastByCoords(${lat}, ${lon})`);
+  }
+};
+
+module.exports = { getCurrentWeather, getForecast, getLocation, getCurrentWeatherByCoords, getForecastByCoords };
