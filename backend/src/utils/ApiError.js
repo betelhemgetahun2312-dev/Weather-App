@@ -13,6 +13,14 @@ class ApiError extends Error {
     return new ApiError(message, 404);
   }
 
+  static timeout(message = 'Request timed out. Please try again.') {
+    return new ApiError(message, 408);
+  }
+
+  static serviceUnavailable(message = 'Weather service is currently unavailable.') {
+    return new ApiError(message, 503);
+  }
+
   static internal(message = 'Internal Server Error') {
     return new ApiError(message, 500);
   }
