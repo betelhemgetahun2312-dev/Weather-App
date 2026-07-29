@@ -1,26 +1,21 @@
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  label?: string;
 }
 
-const sizes = {
-  sm: 'h-4 w-4 border-2',
-  md: 'h-8 w-8 border-2',
-  lg: 'h-12 w-12 border-[3px]',
-};
+const sizes = { sm: 14, md: 24, lg: 36 };
 
-export default function Spinner({ size = 'md', className }: SpinnerProps) {
+export default function Spinner({ size = 'md', className, label = 'Loading' }: SpinnerProps) {
   return (
-    <span
+    <Loader2
       role="status"
-      aria-label="Loading"
-      className={cn(
-        'inline-block animate-spin rounded-full border-blue-600 border-t-transparent',
-        sizes[size],
-        className
-      )}
+      aria-label={label}
+      size={sizes[size]}
+      className={cn('animate-spin text-blue-400', className)}
     />
   );
 }

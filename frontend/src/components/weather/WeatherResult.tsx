@@ -107,7 +107,7 @@ export default function WeatherResult({
 
       {/* Inline loading indicator shown above results while refreshing */}
       {isLoading && (weather || forecast) && (
-        <div className="flex items-center justify-center gap-2 text-sm text-white/50">
+        <div className="flex items-center justify-center gap-2 text-xs text-white/40" aria-hidden="true">
           <Spinner size="sm" />
           <span>Updating…</span>
         </div>

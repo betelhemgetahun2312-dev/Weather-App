@@ -21,3 +21,18 @@
     max-width: 100%;
   }
 }
+
+@layer utilities {
+  /* Tailwind v4 doesn’t ship bg-white/8 by default */
+  .bg-white\/8 {
+    background-color: rgb(255 255 255 / 0.08);
+  }
+
+  /* Smooth scroll snap for forecast strip on mobile */
+  .snap-x-mandatory {
+    scroll-snap-type: x mandatory;
+  }
+  .snap-start {
+    scroll-snap-align: start;
+  }
+}

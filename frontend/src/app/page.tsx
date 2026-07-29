@@ -10,16 +10,18 @@ import WeatherResult from '@/components/weather/WeatherResult';
 import LocationButton from '@/components/weather/LocationButton';
 import RecentSearches from '@/components/weather/RecentSearches';
 import EmptyState from '@/components/ui/EmptyState';
+import { Globe, Sun, Cloud, CloudRain, CloudSnow, Moon, CloudSun } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import { useRecentSearches } from '@/hooks/useRecentSearches';
 import { getWeatherTheme, getBackgroundConfig, isNightTime } from '@/utils/weatherBackground';
 
-const THEME_ICONS: Record<string, string> = {
-  sunny: '☀️',
-  cloudy: '☁️',
-  rain: '🌧️',
-  snow: '❄️',
-  night: '🌙',
-  default: '🌤️',
+const THEME_ICONS: Record<string, LucideIcon> = {
+  sunny: Sun,
+  cloudy: Cloud,
+  rain: CloudRain,
+  snow: CloudSnow,
+  night: Moon,
+  default: CloudSun,
 };
 
 export default function HomePage() {
@@ -97,8 +99,8 @@ export default function HomePage() {
         {/* Hero */}
         <section className="px-4 pb-8 pt-14 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-3 text-5xl" aria-hidden="true">
-              {THEME_ICONS[theme] ?? '🌤️'}
+            <div className="mb-4" aria-hidden="true">
+              {(() => { const ThemeIcon = THEME_ICONS[theme] ?? CloudSun; return <ThemeIcon size={52} className="mx-auto text-white/80 drop-shadow-lg" />; })()}
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-white drop-shadow sm:text-4xl">
               Weather Dashboard
@@ -143,7 +145,7 @@ export default function HomePage() {
             />
           ) : (
             <EmptyState
-              icon="🌍"
+              Icon={Globe}
               title="Search for a city or use your location"
               description='Try London, Tokyo, New York, or click "Use My Location".'
             />

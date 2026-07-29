@@ -1,11 +1,14 @@
+import { Globe } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
+
 interface EmptyStateProps {
-  icon?: string;
+  Icon?: LucideIcon;
   title: string;
   description?: string;
 }
 
 export default function EmptyState({
-  icon = '🌍',
+  Icon = Globe,
   title,
   description,
 }: EmptyStateProps) {
@@ -13,12 +16,14 @@ export default function EmptyState({
     <div
       role="status"
       aria-live="polite"
-      className="flex flex-col items-center justify-center py-24 text-center"
+      className="flex flex-col items-center justify-center py-20 text-center"
     >
-      <span className="mb-5 text-7xl" aria-hidden="true">{icon}</span>
-      <p className="text-xl font-semibold text-white/80">{title}</p>
+      <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10">
+        <Icon size={36} className="text-white/30" aria-hidden="true" />
+      </div>
+      <p className="text-lg font-semibold text-white/70">{title}</p>
       {description && (
-        <p className="mt-2 text-sm text-white/40">{description}</p>
+        <p className="mt-2 max-w-xs text-sm text-white/35">{description}</p>
       )}
     </div>
   );

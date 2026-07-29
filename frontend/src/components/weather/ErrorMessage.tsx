@@ -1,3 +1,5 @@
+import { Search, Timer, WifiOff, KeyRound, Gauge, AlertTriangle, RotateCcw } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 interface ErrorMessageProps {
@@ -5,17 +7,14 @@ interface ErrorMessageProps {
   onRetry?: () => void;
 }
 
-type ErrorType = 'notFound' | 'timeout' | 'network' | 'auth' | 'rateLimit' | 'generic';
-
 interface ErrorMeta {
-  type: ErrorType;
-  icon: string;
+  Icon: LucideIcon;
   title: string;
   hint: string;
-  borderColor: string;
+  iconClass: string;
   iconBg: string;
-  titleColor: string;
-  hintColor: string;
+  titleClass: string;
+  borderClass: string;
 }
 
 function getErrorMeta(message: string): ErrorMeta {
@@ -23,73 +22,67 @@ function getErrorMeta(message: string): ErrorMeta {
 
   if (m.includes('not found') || m.includes('city') || m.includes('no city'))
     return {
-      type: 'notFound',
-      icon: '🔍',
+      Icon: Search,
       title: 'City Not Found',
       hint: 'Double-check the spelling or try a nearby city.',
-      borderColor: 'border-amber-400/30',
+      iconClass: 'text-amber-300',
       iconBg: 'bg-amber-400/10',
-      titleColor: 'text-amber-300',
-      hintColor: 'text-amber-200/60',
+      titleClass: 'text-amber-300',
+      borderClass: 'border-amber-400/25',
     };
 
   if (m.includes('timeout') || m.includes('timed out'))
     return {
-      type: 'timeout',
-      icon: '⏱️',
+      Icon: Timer,
       title: 'Request Timed Out',
-      hint: 'The server took too long to respond. Try again in a moment.',
-      borderColor: 'border-orange-400/30',
+      hint: 'The server took too long. Try again in a moment.',
+      iconClass: 'text-orange-300',
       iconBg: 'bg-orange-400/10',
-      titleColor: 'text-orange-300',
-      hintColor: 'text-orange-200/60',
+      titleClass: 'text-orange-300',
+      borderClass: 'border-orange-400/25',
     };
 
   if (m.includes('network') || m.includes('server') || m.includes('reach') || m.includes('connection'))
     return {
-      type: 'network',
-      icon: '📡',
+      Icon: WifiOff,
       title: 'Connection Error',
       hint: 'Check your internet connection and try again.',
-      borderColor: 'border-red-400/30',
+      iconClass: 'text-red-300',
       iconBg: 'bg-red-400/10',
-      titleColor: 'text-red-300',
-      hintColor: 'text-red-200/60',
+      titleClass: 'text-red-300',
+      borderClass: 'border-red-400/25',
     };
 
   if (m.includes('api key') || m.includes('unauthorized') || m.includes('forbidden'))
     return {
-      type: 'auth',
-      icon: '🔑',
+      Icon: KeyRound,
       title: 'Authentication Error',
       hint: 'There is a configuration issue. Please contact support.',
-      borderColor: 'border-purple-400/30',
+      iconClass: 'text-purple-300',
       iconBg: 'bg-purple-400/10',
-      titleColor: 'text-purple-300',
-      hintColor: 'text-purple-200/60',
+      titleClass: 'text-purple-300',
+      borderClass: 'border-purple-400/25',
     };
 
   if (m.includes('rate limit'))
     return {
-      type: 'rateLimit',
-      icon: '🚦',
+      Icon: Gauge,
       title: 'Rate Limit Reached',
-      hint: 'Too many requests. Please wait a moment before trying again.',
-      borderColor: 'border-yellow-400/30',
+      hint: 'Too many requests. Please wait a moment.',
+      iconClass: 'text-yellow-300',
       iconBg: 'bg-yellow-400/10',
-      titleColor: 'text-yellow-300',
-      hintColor: 'text-yellow-200/60',
+      titleClass: 'text-yellow-300',
+      borderClass: 'border-yellow-400/25',
     };
 
   return {
-    type: 'generic',
-    icon: '⚠️',
+    Icon: AlertTriangle,
     title: 'Something Went Wrong',
     hint: 'An unexpected error occurred. Please try again.',
-    borderColor: 'border-slate-400/30',
+    iconClass: 'text-slate-300',
     iconBg: 'bg-slate-400/10',
-    titleColor: 'text-slate-300',
-    hintColor: 'text-slate-400/60',
+    titleClass: 'text-slate-300',
+    borderClass: 'border-slate-400/25',
   };
 }
 
@@ -100,30 +93,26 @@ export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
     <div
       role="alert"
       aria-live="assertive"
-      className={`flex flex-col items-center justify-center rounded-3xl border ${meta.borderColor} bg-white/5 px-6 py-12 text-center backdrop-blur-sm`}
+      className={`flex flex-col items-center justify-center rounded-3xl border ${meta.borderClass} bg-white/5 px-6 py-12 text-center backdrop-blur-sm`}
     >
-      <span
-        className={`mb-4 flex h-16 w-16 items-center justify-center rounded-full text-4xl ${meta.iconBg}`}
-        aria-hidden="true"
-      >
-        {meta.icon}
-      </span>
+      <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-full ${meta.iconBg}`}>
+        <meta.Icon size={28} className={meta.iconClass} aria-hidden="true" />
+      </div>
 
-      <h3 className={`text-lg font-bold ${meta.titleColor}`}>{meta.title}</h3>
-
-      <p className="mt-1.5 max-w-xs text-sm text-white/50">{message}</p>
-
-      <p className={`mt-1 max-w-xs text-xs ${meta.hintColor}`}>{meta.hint}</p>
+      <h3 className={`text-lg font-bold ${meta.titleClass}`}>{meta.title}</h3>
+      <p className="mt-1.5 max-w-xs text-sm text-white/45">{message}</p>
+      <p className="mt-1 max-w-xs text-xs text-white/25">{meta.hint}</p>
 
       {onRetry && (
         <Button
-          variant="primary"
+          variant="secondary"
           size="sm"
           className="mt-6"
           onClick={onRetry}
           aria-label="Retry the last search"
         >
-          🔄 Try Again
+          <RotateCcw size={13} aria-hidden="true" />
+          Try Again
         </Button>
       )}
     </div>

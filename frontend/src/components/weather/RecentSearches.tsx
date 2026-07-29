@@ -1,5 +1,7 @@
 'use client';
 
+import { Clock, X } from 'lucide-react';
+
 interface RecentSearchesProps {
   recents: string[];
   onSelect: (city: string) => void;
@@ -10,24 +12,31 @@ export default function RecentSearches({ recents, onSelect, onClear }: RecentSea
   if (recents.length === 0) return null;
 
   return (
-    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-      <span className="text-xs font-medium text-white/40 uppercase tracking-wider">Recent:</span>
+    <nav aria-label="Recent searches" className="mt-3 flex flex-wrap items-center justify-center gap-2">
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-white/35">
+        Recent
+      </span>
+
       {recents.map((city) => (
         <button
           key={city}
           onClick={() => onSelect(city)}
-          className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/80 backdrop-blur-sm transition-all duration-150 hover:border-blue-400/50 hover:bg-white/20 hover:text-white"
+          aria-label={`Search again for ${city}`}
+          className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-medium text-white/70 backdrop-blur-sm transition-all duration-150 hover:border-blue-400/40 hover:bg-white/15 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50"
         >
-          🕐 {city}
+          <Clock size={11} aria-hidden="true" className="text-white/40" />
+          {city}
         </button>
       ))}
+
       <button
         onClick={onClear}
-        aria-label="Clear recent searches"
-        className="rounded-full px-2 py-1 text-xs text-white/30 transition hover:text-red-400"
+        aria-label="Clear all recent searches"
+        className="flex items-center gap-1 rounded-full px-2 py-1 text-[11px] text-white/25 transition hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50"
       >
-        ✕ clear
+        <X size={11} aria-hidden="true" />
+        clear
       </button>
-    </div>
+    </nav>
   );
 }

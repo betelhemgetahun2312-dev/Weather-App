@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { UnitsProvider } from '@/context/UnitsContext';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -12,9 +13,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col bg-slate-900 text-gray-900 antialiased">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <UnitsProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </UnitsProvider>
       </body>
     </html>
   );
