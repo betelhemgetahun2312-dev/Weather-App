@@ -1,4 +1,4 @@
-import { CurrentWeather, ForecastData, Units } from '@/types/weather';
+import { CurrentWeather, ForecastData } from '@/types/weather';
 import WeatherCard from '@/components/weather/WeatherCard';
 import ForecastStrip from '@/components/weather/ForecastStrip';
 import ErrorMessage from '@/components/weather/ErrorMessage';
@@ -10,7 +10,6 @@ interface WeatherResultProps {
   forecastLoading: boolean;
   weatherError: string | null;
   forecastError: string | null;
-  units: Units;
   onRetry: () => void;
 }
 
@@ -75,7 +74,6 @@ export default function WeatherResult({
   forecastLoading,
   weatherError,
   forecastError,
-  units,
   onRetry,
 }: WeatherResultProps) {
   const hasError = weatherError || forecastError;
@@ -91,9 +89,9 @@ export default function WeatherResult({
 
   return (
     <div className="flex flex-col gap-6">
-      {weatherLoading ? <WeatherSkeleton /> : weather && <WeatherCard data={weather} units={units} />}
+      {weatherLoading ? <WeatherSkeleton /> : weather && <WeatherCard data={weather} />}
       {forecastLoading ? <ForecastSkeleton /> : forecast && forecast.daily.length > 0 && (
-        <ForecastStrip data={forecast} units={units} />
+        <ForecastStrip data={forecast} />
       )}
     </div>
   );

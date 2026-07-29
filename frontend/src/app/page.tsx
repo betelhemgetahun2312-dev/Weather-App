@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Units } from '@/types/weather';
+import { useState, useCallback, useEffect } from 'react';
+import { useUnits } from '@/context/UnitsContext';
 import { useWeather } from '@/hooks/useWeather';
 import { useForecast } from '@/hooks/useForecast';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -22,7 +22,7 @@ const THEME_ICONS: Record<string, string> = {
 export default function HomePage() {
   const [lastCity, setLastCity] = useState('');
   const [lastCoords, setLastCoords] = useState<{ lat: number; lon: number } | null>(null);
-  const [units] = useState<Units>('metric');
+  const { units } = useUnits();
 
   const { data: weather, loading: weatherLoading, error: weatherError, getWeather, getWeatherByCoords } = useWeather();
   const { data: forecast, loading: forecastLoading, error: forecastError, getForecast, getForecastByCoords } = useForecast();
@@ -60,6 +60,18 @@ export default function HomePage() {
       getForecast(lastCity, units);
     }
   }, [lastCoords, lastCity, getWeather, getForecast, getWeatherByCoords, getForecastByCoords, units]);
+
+  // Re-fetch with new units whenever the user toggles the unit
+  useEffect(() => {
+    if (lastCoords) {
+      getWeatherByCoords(lastCoords.lat, lastCoords.lon, units);
+      getForecastByCoords(lastCoords.lat, lastCoords.lon, units);
+    } else if (lastCity) {
+      getWeather(lastCity, units);
+      getForecast(lastCity, units);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [units]);
 
   const isLoading = weatherLoading || forecastLoading;
   const hasResult = weather || forecast || weatherError || forecastError || isLoading;
@@ -120,7 +132,6 @@ export default function HomePage() {
               forecastLoading={forecastLoading}
               weatherError={weatherError}
               forecastError={forecastError}
-              units={units}
               onRetry={handleRetry}
             />
           ) : (
