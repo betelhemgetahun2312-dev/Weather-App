@@ -8,6 +8,8 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import SearchBar from '@/components/weather/SearchBar';
 import WeatherResult from '@/components/weather/WeatherResult';
 import LocationButton from '@/components/weather/LocationButton';
+import RecentSearches from '@/components/weather/RecentSearches';
+import { useRecentSearches } from '@/hooks/useRecentSearches';
 import { getWeatherTheme, getBackgroundConfig, isNightTime } from '@/utils/weatherBackground';
 
 const THEME_ICONS: Record<string, string> = {
@@ -23,6 +25,7 @@ export default function HomePage() {
   const [lastCity, setLastCity] = useState('');
   const [lastCoords, setLastCoords] = useState<{ lat: number; lon: number } | null>(null);
   const { units } = useUnits();
+  const { recents, addRecent, clearRecents } = useRecentSearches();
 
   const { data: weather, loading: weatherLoading, error: weatherError, getWeather, getWeatherByCoords } = useWeather();
   const { data: forecast, loading: forecastLoading, error: forecastError, getForecast, getForecastByCoords } = useForecast();
@@ -34,10 +37,11 @@ export default function HomePage() {
       setLastCity(city);
       setLastCoords(null);
       resetGeo();
+      addRecent(city);
       getWeather(city, units);
       getForecast(city, units);
     },
-    [getWeather, getForecast, units, resetGeo]
+    [getWeather, getForecast, units, resetGeo, addRecent]
   );
 
   // Search by coordinates — reuses existing hooks, no duplication
@@ -110,6 +114,8 @@ export default function HomePage() {
                 placeholder="Search city... e.g. London, Tokyo, New York"
               />
             </div>
+
+            <RecentSearches recents={recents} onSelect={handleSearch} onClear={clearRecents} />
 
             {/* Location button — separated from search, no code duplication */}
             <div className="mt-4 flex justify-center">
