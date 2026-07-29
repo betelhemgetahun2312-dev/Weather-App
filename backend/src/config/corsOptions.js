@@ -1,5 +1,7 @@
+const { CLIENT_URL } = require('./env');
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: CLIENT_URL,
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };

@@ -1,10 +1,10 @@
 const asyncWrapper = require('../utils/asyncWrapper');
 const weatherService = require('../services/weather.service');
 
-const getWeather = asyncWrapper(async (req, res) => {
+const getForecast = asyncWrapper(async (req, res) => {
   const { city } = req.query;
-  const data = await weatherService.getCurrentWeather(city);
+  const data = await weatherService.getForecast(city);
   res.json({ success: true, data });
 });
 
-module.exports = { getWeather };
+module.exports = { getForecast };

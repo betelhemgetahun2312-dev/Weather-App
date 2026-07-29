@@ -1,14 +1,14 @@
 const express = require('express');
 const { query } = require('express-validator');
 const router = express.Router();
-const weatherController = require('../controllers/weather.controller');
+const locationController = require('../controllers/location.controller');
 const validate = require('../middleware/validate');
 
 router.get(
   '/',
   [query('city').notEmpty().withMessage('city query param is required').trim()],
   validate,
-  weatherController.getWeather
+  locationController.getLocation
 );
 
 module.exports = router;
