@@ -1,65 +1,93 @@
 const axios = require('axios');
-const { WEATHER_API_KEY, WEATHER_API_BASE_URL } = require('../config/env');
+const weatherClient = require('../config/axiosClient');
+const { WEATHER_API_KEY, WEATHER_GEO_URL, WEATHER_API_TIMEOUT } = require('../config/env');
+const { mapCurrentWeather, mapForecast, mapLocation } = require('../utils/mappers');
 const ApiError = require('../utils/ApiError');
+const logger = require('../utils/logger');
 
-const client = axios.create({
-  baseURL: WEATHER_API_BASE_URL,
-  params: { appid: WEATHER_API_KEY, units: 'metric' },
-});
+/**
+ * Normalizes Axios errors from OpenWeatherMap into ApiError instances.
+ */
+const handleApiError = (err, context) => {
+  if (err instanceof ApiError) throw err;
 
-const getCurrentWeather = async (city) => {
+  if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') {
+    throw ApiError.timeout(`${context}: request timed out`);
+  }
+
+  if (!err.response) {
+    throw ApiError.serviceUnavailable(`${context}: service unreachable`);
+  }
+
+  const status = err.response.status;
+  const message = err.response.data?.message || 'Unknown error';
+
+  if (status === 401) throw ApiError.internal('Invalid API key. Check WEATHER_API_KEY in .env');
+  if (status === 404) throw ApiError.notFound(`${context}: city not found`);
+  if (status === 429) throw ApiError.serviceUnavailable(`${context}: API rate limit exceeded`);
+  if (status >= 500) throw ApiError.serviceUnavailable(`${context}: upstream server error — ${message}`);
+
+  throw ApiError.internal(`${context}: unexpected error (${status})`);
+};
+
+/**
+ * Fetches current weather for a given city.
+ * @param {string} city
+ * @param {string} units - metric | imperial | standard
+ */
+const getCurrentWeather = async (city, units = 'metric') => {
+  logger.info(`Fetching current weather for "${city}" [units: ${units}]`);
   try {
-    const { data } = await client.get('/weather', { params: { q: city } });
-    return {
-      city: data.name,
-      country: data.sys.country,
-      temperature: data.main.temp,
-      feelsLike: data.main.feels_like,
-      humidity: data.main.humidity,
-      description: data.weather[0].description,
-      icon: data.weather[0].icon,
-      windSpeed: data.wind.speed,
-    };
+    const { data } = await weatherClient.get('/weather', {
+      params: { q: city, units },
+    });
+    return mapCurrentWeather(data);
   } catch (err) {
-    if (err.response?.status === 404) throw ApiError.notFound(`City "${city}" not found`);
-    throw ApiError.internal('Failed to fetch weather data');
+    handleApiError(err, `getCurrentWeather("${city}")`);
   }
 };
 
-const getForecast = async (city) => {
+/**
+ * Fetches 5-day / 3-hour forecast for a given city.
+ * @param {string} city
+ * @param {string} units - metric | imperial | standard
+ */
+const getForecast = async (city, units = 'metric') => {
+  logger.info(`Fetching 5-day forecast for "${city}" [units: ${units}]`);
   try {
-    const { data } = await client.get('/forecast', { params: { q: city } });
-    return data.list.map((item) => ({
-      datetime: item.dt_txt,
-      temperature: item.main.temp,
-      description: item.weather[0].description,
-      icon: item.weather[0].icon,
-      humidity: item.main.humidity,
-      windSpeed: item.wind.speed,
-    }));
+    const { data } = await weatherClient.get('/forecast', {
+      params: { q: city, units },
+    });
+    return mapForecast(data);
   } catch (err) {
-    if (err.response?.status === 404) throw ApiError.notFound(`City "${city}" not found`);
-    throw ApiError.internal('Failed to fetch forecast data');
+    handleApiError(err, `getForecast("${city}")`);
   }
 };
 
-const getLocation = async (city) => {
+/**
+ * Fetches location suggestions using the Geocoding API.
+ * @param {string} city
+ * @param {number} limit - max results (1–5)
+ */
+const getLocation = async (city, limit = 5) => {
+  logger.info(`Fetching location data for "${city}" [limit: ${limit}]`);
   try {
-    const { data } = await axios.get(
-      'http://api.openweathermap.org/geo/1.0/direct',
-      { params: { q: city, limit: 5, appid: WEATHER_API_KEY } }
-    );
-    if (!data.length) throw ApiError.notFound(`No location found for "${city}"`);
-    return data.map((loc) => ({
-      name: loc.name,
-      country: loc.country,
-      state: loc.state || null,
-      lat: loc.lat,
-      lon: loc.lon,
-    }));
+    const { data } = await axios.get(`${WEATHER_GEO_URL}/direct`, {
+      timeout: WEATHER_API_TIMEOUT,
+      params: {
+        q: city,
+        limit,
+        appid: WEATHER_API_KEY,
+      },
+    });
+
+    if (!data || data.length === 0) {
+      throw ApiError.notFound(`No locations found for "${city}"`);
+    }
+
+    return data.map(mapLocation);
   } catch (err) {
-    if (err instanceof ApiError) throw err;
-    throw ApiError.internal('Failed to fetch location data');
+    handleApiError(err, `getLocation("${city}")`);
   }
 };
 
